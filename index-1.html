@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111426">
+<title>Мой прогресс</title>
+<style>
+:root{color-scheme:dark;--bg:#111426;--card:#1b2038;--input:#12172c;--line:#333b5d;--text:#f4f5ff;--muted:#b0b8d3;--accent:#b4a4ff;--green:#80e8ba}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top left,#262145,var(--bg) 65%);background-attachment:fixed;color:var(--text);font:16px/1.5 system-ui,sans-serif}
+main{max-width:1000px;margin:auto;padding:36px 20px 60px}header{display:flex;justify-content:space-between;gap:20px;align-items:center}
+h1{margin:4px 0;font-size:clamp(28px,5vw,42px);letter-spacing:-1px}h2{margin:0 0 16px;font-size:22px}h3{margin:0;font-size:19px;overflow-wrap:anywhere}p{margin:8px 0}.muted,small{color:var(--muted)}.eyebrow{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:2px}
+button,input,select{font:inherit}button{border:1px solid transparent;border-radius:12px;background:var(--accent);color:#19132e;padding:11px 16px;cursor:pointer;font-weight:700}button:hover{filter:brightness(1.12)}button:active{transform:translateY(1px)}button.secondary{background:transparent;color:var(--text);border-color:var(--line)}button.delete{background:transparent;color:#ffb8c2;padding:7px 10px;font-size:13px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--green);outline-offset:3px}
+input:not([type=checkbox]),select{width:100%;min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--input);color:var(--text)}input::placeholder{color:#949ebc}label.field{display:grid;gap:6px;font-size:13px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:28px 0}.stat{background:#1b2038cc;border:1px solid var(--line);border-radius:18px;padding:18px}.stat strong{display:block;font-size:27px;color:var(--green)}.stat span{color:var(--muted);font-size:13px}
+nav{display:flex;gap:8px;margin-bottom:22px}nav button{flex:1;background:transparent;color:var(--muted);border-color:var(--line)}nav button[aria-pressed=true]{background:var(--accent);color:#19132e;border-color:var(--accent)}
+.panel,.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px}.panel{margin-bottom:18px}.add-form{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.add-form .field{flex:1 1 220px}.add-form .narrow{flex:0 1 175px}.list{display:grid;gap:14px}.card-top{display:flex;justify-content:space-between;gap:12px;align-items:start}
+progress{display:block;width:100%;height:10px;margin:14px 0 8px;border:0;border-radius:10px;overflow:hidden;background:var(--input);accent-color:var(--green)}progress::-webkit-progress-bar{background:var(--input)}progress::-webkit-progress-value{background:var(--green);border-radius:10px}progress::-moz-progress-bar{background:var(--green);border-radius:10px}
+.steps{margin:16px 0;display:grid;gap:8px}.check-row{display:flex;gap:10px;align-items:center;padding:8px 0}.check-row label{display:flex;align-items:center;gap:12px;flex:1;min-width:0}.check-row span{overflow-wrap:anywhere}input[type=checkbox]{width:21px;height:21px;flex-shrink:0;accent-color:var(--green);cursor:pointer}.done{text-decoration:line-through;color:var(--muted)}
+.inline-form{display:flex;gap:8px;margin-top:14px}.inline-form input{flex:1;min-width:0}.inline-form button{flex-shrink:0}.empty{text-align:center;color:var(--muted);padding:36px 20px;border:1px dashed var(--line);border-radius:18px}.badge{display:inline-block;font-size:12px;color:var(--green);margin-top:8px}.overdue{color:#ffc392}.notice{color:#ffe0a6;background:#49371b;padding:14px;border-radius:12px;margin:16px 0}footer{margin-top:32px;color:var(--muted);font-size:13px}[hidden]{display:none!important}
+@media(max-width:600px){main{padding:24px 14px 40px}header{align-items:start;flex-direction:column}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:23px}nav button{padding:11px 5px;font-size:14px}.panel,.card{padding:16px}.add-form .field,.add-form .narrow{flex:1 1 100%}.add-form>button{width:100%}}
+</style>
+</head>
+<body>
+<main>
+<header><div><div class="eyebrow">МАЛЕНЬКИЕ ШАГИ. БОЛЬШИЕ ПЕРЕМЕНЫ.</div><h1>Мой прогресс ✨</h1><p class="muted">Не нужно успевать всё. Начни с одного шага.</p></div><button class="secondary" id="export">Скачать данные ↓</button></header>
+<p id="storage-warning" class="notice" role="alert" hidden>Браузер не смог сохранить изменения. Скачай данные, прежде чем закрывать страницу.</p>
+<div class="stats"><div class="stat"><strong id="stat-goals">0</strong><span>целей достигнуто</span></div><div class="stat"><strong id="stat-plans">0</strong><span>дел выполнено</span></div><div class="stat"><strong id="stat-time">0</strong><span>часов практики</span></div></div>
+<nav aria-label="Разделы планировщика"><button type="button" data-tab="goals" aria-pressed="true">🎯 Цели</button><button type="button" data-tab="plans" aria-pressed="false">✅ Планы</button><button type="button" data-tab="skills" aria-pressed="false">🌱 Навыки</button></nav>
+<section id="goals"><div class="panel"><h2>К чему ты хочешь прийти?</h2><form id="goal-form" class="add-form"><label class="field">Новая цель<input name="title" placeholder="Например: создать свой первый сайт" required maxlength="180"></label><button>Добавить цель</button></form></div><div id="goal-list" class="list"></div></section>
+<section id="plans" hidden><div class="panel"><h2>Что планируешь сделать?</h2><form id="plan-form" class="add-form"><label class="field">Дело<input name="title" placeholder="Например: пройти урок по HTML" required maxlength="180"></label><label class="field narrow">Дата, необязательно<input name="date" type="date"></label><button>Добавить план</button></form></div><div id="plan-list" class="list"></div></section>
+<section id="skills" hidden><div class="panel"><h2>Какой навык будем развивать?</h2><p class="muted">Выбери ориентир в часах и записывай время практики после занятий.</p><form id="skill-form" class="add-form"><label class="field">Навык<input name="title" placeholder="Английский, гитара, программирование…" required maxlength="100"></label><label class="field narrow">Цель в часах<input name="hours" type="number" min="1" max="10000" value="20" required></label><button>Добавить навык</button></form><small>Часы показывают регулярность практики, а не уровень владения навыком.</small></div><div id="skill-list" class="list"></div></section>
+<footer>Сохраняется только в этом браузере. Очистка данных браузера может удалить записи.<br>Для восстановления резервной копии: <button class="secondary" id="import" type="button">Загрузить данные</button><input id="import-file" type="file" accept=".json,application/json" hidden></footer>
+</main>
+<script>
+"use strict";
+const KEY="my-progress-v1";
+const $=selector=>document.querySelector(selector);
+let state={goals:[],plans:[],skills:[]};
+const uid=()=>globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+Math.random().toString(36).slice(2);
+function valid(data){
+ const text=v=>typeof v==="string",item=v=>v&&text(v.id)&&text(v.title);
+ const date=v=>text(v)&&(v===""||/^\d{4}-\d{2}-\d{2}$/.test(v));
+ return data&&Array.isArray(data.goals)&&Array.isArray(data.plans)&&Array.isArray(data.skills)&&
+ data.goals.every(g=>item(g)&&Array.isArray(g.steps)&&g.steps.every(s=>item(s)&&typeof s.done==="boolean"))&&
+ data.plans.every(p=>item(p)&&date(p.date)&&typeof p.done==="boolean")&&
+ data.skills.every(s=>item(s)&&Number.isFinite(s.target)&&s.target>0&&Number.isFinite(s.minutes)&&s.minutes>=0);
+}
+try{const raw=localStorage.getItem(KEY);if(raw){const loaded=JSON.parse(raw);if(!valid(loaded))throw new Error("Invalid data");state=loaded;}}
+catch{$("#storage-warning").textContent="Не удалось прочитать сохранённые данные. Можно восстановить резервную копию через «Загрузить данные».";$("#storage-warning").hidden=false;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));$("#storage-warning").hidden=true;}catch{$("#storage-warning").textContent="Не удалось сохранить изменения. Скачай данные перед закрытием страницы.";$("#storage-warning").hidden=false;}}
+function update(){save();render();}
+function el(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
+function button(text,className,action){const node=el("button",className,text);node.type="button";node.addEventListener("click",action);return node;}
+function empty(list,text){list.append(el("div","empty",text));}
+function removeItem(type,id){if(!confirm("Удалить запись? Это действие нельзя отменить."))return;state[type]=state[type].filter(item=>item.id!==id);update();}
+function cardHeader(card,title,type,id){const top=el("div","card-top");top.append(el("h3","",title),button("Удалить","delete",()=>removeItem(type,id)));card.append(top);}
+function progress(card,value,label){const bar=el("progress");bar.max=100;bar.value=Math.min(100,Math.max(0,value));bar.setAttribute("aria-label",label);card.append(bar,el("small","",label));}
+function checkRow(item,onChange,onDelete){const row=el("div","check-row"),label=el("label"),checkbox=el("input");checkbox.type="checkbox";checkbox.checked=item.done;checkbox.addEventListener("change",()=>onChange(checkbox.checked));label.append(checkbox,el("span",item.done?"done":"",item.title));row.append(label);if(onDelete){row.append(button("×","delete",onDelete));row.lastChild.setAttribute("aria-label","Удалить шаг: "+item.title);}return row;}
+function inlineForm(placeholder,buttonText,onSubmit,numeric=false){const form=el("form","inline-form"),input=el("input");input.required=true;input.placeholder=placeholder;input.setAttribute("aria-label",placeholder);input.type=numeric?"number":"text";if(numeric){input.min="1";input.max="1440";input.step="1";}else input.maxLength=180;const submit=el("button","",buttonText);submit.type="submit";form.append(input,submit);form.addEventListener("submit",event=>{event.preventDefault();const value=input.value.trim();if(!value)return;onSubmit(numeric?Number(value):value);});return form;}
+function localDate(){const d=new Date();return[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");}
+function renderGoals(){const list=$("#goal-list");list.replaceChildren();if(!state.goals.length)empty(list,"Здесь будут твои цели. Добавь первую и разбей её на небольшие шаги.");state.goals.forEach(goal=>{const card=el("article","card");cardHeader(card,goal.title,"goals",goal.id);const done=goal.steps.filter(s=>s.done).length,total=goal.steps.length;progress(card,total?done/total*100:0,total?`${done} из ${total} шагов выполнено`:"Добавь первый шаг к цели");if(total&&done===total)card.append(el("div","badge","🎉 Цель достигнута!"));const steps=el("div","steps");goal.steps.forEach(step=>steps.append(checkRow(step,checked=>{step.done=checked;update();},()=>{if(!confirm("Удалить этот шаг?"))return;goal.steps=goal.steps.filter(s=>s.id!==step.id);update();})));card.append(steps,inlineForm("Следующий шаг…","+ Шаг",title=>{goal.steps.push({id:uid(),title,done:false});update();}));list.append(card);});}
+function renderPlans(){const list=$("#plan-list");list.replaceChildren();if(!state.plans.length)empty(list,"Пока нет дел. Что хочешь сделать сегодня?");const plans=[...state.plans].sort((a,b)=>Number(a.done)-Number(b.done)||(a.date||"9999").localeCompare(b.date||"9999"));plans.forEach(plan=>{const card=el("article","card"),row=checkRow(plan,checked=>{plan.done=checked;update();});row.append(button("Удалить","delete",()=>removeItem("plans",plan.id)));card.append(row);if(plan.date){const late=!plan.done&&plan.date<localDate(),dateText=new Date(plan.date+"T12:00:00").toLocaleDateString("ru-RU");card.append(el("small",late?"overdue":"",`${late?"Срок прошёл: ":"📅 "}${dateText}`));}list.append(card);});}
+function renderSkills(){const list=$("#skill-list");list.replaceChildren();if(!state.skills.length)empty(list,"Выбери навык, который тебе интересен. Даже короткое занятие считается.");state.skills.forEach(skill=>{const card=el("article","card");cardHeader(card,skill.title,"skills",skill.id);const hours=(skill.minutes/60).toLocaleString("ru-RU",{maximumFractionDigits:1});progress(card,skill.minutes/skill.target*100,`${hours} ч практики из ${skill.target/60} ч`);if(skill.minutes>=skill.target)card.append(el("div","badge","🏆 План по времени выполнен! Можно продолжать."));card.append(inlineForm("Минуты занятия","+ Записать",minutes=>{if(!Number.isInteger(minutes)||minutes<1||minutes>1440)return;skill.minutes+=minutes;update();},true));if(skill.minutes>0)card.append(button("Исправить общее время","delete",()=>{const answer=prompt("Общее время практики в минутах:",skill.minutes);if(answer===null||!answer.trim())return;const minutes=Number(answer);if(!Number.isSafeInteger(minutes)||minutes<0){alert("Введи целое число минут, не меньше нуля.");return;}skill.minutes=minutes;update();}));list.append(card);});}
+function render(){renderGoals();renderPlans();renderSkills();$("#stat-goals").textContent=state.goals.filter(g=>g.steps.length>0&&g.steps.every(s=>s.done)).length;$("#stat-plans").textContent=state.plans.filter(p=>p.done).length;$("#stat-time").textContent=(state.skills.reduce((sum,s)=>sum+s.minutes,0)/60).toLocaleString("ru-RU",{maximumFractionDigits:1});}
+document.querySelectorAll("[data-tab]").forEach(tab=>tab.addEventListener("click",()=>{document.querySelectorAll("[data-tab]").forEach(other=>{const active=other===tab;other.setAttribute("aria-pressed",String(active));document.getElementById(other.dataset.tab).hidden=!active;});}));
+function bindForm(selector,handler){$(selector).addEventListener("submit",event=>{event.preventDefault();const form=event.currentTarget,data=new FormData(form),title=String(data.get("title")||"").trim();if(!title)return;handler(title,data);form.reset();update();form.elements.title.focus();});}
+bindForm("#goal-form",title=>state.goals.unshift({id:uid(),title,steps:[]}));
+bindForm("#plan-form",(title,data)=>state.plans.unshift({id:uid(),title,date:String(data.get("date")||""),done:false}));
+bindForm("#skill-form",(title,data)=>state.skills.unshift({id:uid(),title,target:Number(data.get("hours"))*60,minutes:0}));
+$("#export").addEventListener("click",()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),link=el("a");link.href=url;link.download=`my-progress-${localDate()}.json`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+$("#import").addEventListener("click",()=>$("#import-file").click());
+$("#import-file").addEventListener("change",async event=>{const file=event.target.files[0];if(!file)return;try{if(file.size>5*1024*1024)throw new Error("File too large");const data=JSON.parse(await file.text());if(!valid(data))throw new Error("Invalid data");if(!confirm("Заменить текущие записи данными из файла?"))return;state={goals:data.goals.map(g=>({id:uid(),title:g.title,steps:g.steps.map(s=>({id:uid(),title:s.title,done:s.done}))})),plans:data.plans.map(p=>({id:uid(),title:p.title,date:p.date,done:p.done})),skills:data.skills.map(s=>({id:uid(),title:s.title,target:s.target,minutes:s.minutes}))};update();}catch{alert("Не удалось загрузить файл. Выбери резервную копию этого планировщика в формате JSON размером до 5 МБ.");}finally{event.target.value="";}});
+render();
+</script>
+</body>
+</html>
